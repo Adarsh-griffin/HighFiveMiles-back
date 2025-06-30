@@ -1,8 +1,11 @@
+// server.js
+
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+const path = require('path'); // Import Node.js built-in path module
 
 // Load environment variables from .env
 dotenv.config();
@@ -17,10 +20,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Parse JSON request bodies
 app.use(express.json());
+// Parse cookies
 app.use(cookieParser());
-app.use(express.json());
-
+// Note: Removed the duplicate `app.use(express.json());` here.
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -36,16 +40,21 @@ const connectDB = async () => {
   }
 };
 
+// Serve static files from the 'uploads' directory
+// This makes your uploaded profile pictures accessible via a URL like /uploads/filename.jpg
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes'); // Import your new profile routes
 
 //const userPreferences = require ('./routes/userPreferences'); // MongoDB persistent preferences
 
 
-
-
 // API Endpoints
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes); // Mount the new profile routes at the /api/profile path
 
 
 // Test route
