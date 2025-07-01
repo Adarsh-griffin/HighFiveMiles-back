@@ -1,10 +1,27 @@
-const express = require('express');
-const { signup, login } = require('../controllers/authController');  // Use require for importing controller functions
+const express = require("express");
+const multer = require("multer");
+
+const {
+  signup,
+  login,
+  updateUserProfile,
+} = require("../controllers/authController");
+
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// POST routes for signup and login
-router.post('/signup', signup);
-router.post('/login', login);
+// 🧠 Use memory storage to avoid saving files to disk
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-module.exports = router;  // Use module.exports for exporting the router
+// --- ROUTES ---
+
+// Signup & Login
+router.post("/signup", signup);
+router.post("/login", login);
+
+// Profile update (name + image in memory)
+router.put("/profile", protect, upload.single("profilePicture"), updateUserProfile);
+
+module.exports = router;

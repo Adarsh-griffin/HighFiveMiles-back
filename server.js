@@ -47,14 +47,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
-const profileRoutes = require('./routes/profileRoutes'); // Import your new profile routes
+ // Import your new profile routes
 
 //const userPreferences = require ('./routes/userPreferences'); // MongoDB persistent preferences
 
 
 // API Endpoints
 app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes); // Mount the new profile routes at the /api/profile path
+ // Mount the new profile routes at the /api/profile path
 
 
 // Test route

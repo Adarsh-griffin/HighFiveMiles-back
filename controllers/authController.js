@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Profile = require('../models/profile'); // Import the new Profile model
-
+const asyncHandler = require('express-async-handler');
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 const signup = async (req, res) => {
@@ -16,7 +16,7 @@ const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the User (for authentication)
-    const user = new User({ email, password: hashedPassword });
+    const user = new User({ username ,email, password: hashedPassword });
     await user.save();
 
     // --- Create a corresponding Profile for the new user ---
@@ -79,4 +79,36 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { signup, login }; // Export the functions using module.exports
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  // Find profile by user
+  const profile = await Profile.findOne({ user: user._id });
+  if (!profile) {
+    return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  // Update name
+  if (req.body.name) {
+    profile.name = req.body.name;
+  }
+
+  // Handle image if uploaded (base64)
+  if (req.file) {
+    const imageBuffer = req.file.buffer;
+    const base64Image = `data:${req.file.mimetype};base64,${imageBuffer.toString('base64')}`;
+    profile.profilePicture = base64Image;
+  }
+
+  const updatedProfile = await profile.save();
+
+  res.status(200).json({
+    name: updatedProfile.name,
+    profilePicture: updatedProfile.profilePicture,
+    message: 'Profile updated successfully',
+  });
+});
+
+
+
+module.exports = { signup, login ,updateUserProfile}; // Export the functions using module.exports
